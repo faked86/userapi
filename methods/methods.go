@@ -2,7 +2,6 @@ package methods
 
 import (
 	"encoding/json"
-	"errors"
 	"io/fs"
 	"io/ioutil"
 	"net/http"
@@ -26,10 +25,6 @@ type (
 		Increment int      `json:"increment"`
 		List      UserList `json:"list"`
 	}
-)
-
-var (
-	ErrUserNotFound = errors.New("user_not_found")
 )
 
 func SearchUsers(w http.ResponseWriter, r *http.Request) {
@@ -141,27 +136,4 @@ func DeleteUser(w http.ResponseWriter, r *http.Request) {
 	_ = ioutil.WriteFile(store, b, fs.ModePerm)
 
 	render.Status(r, http.StatusNoContent)
-}
-
-type ErrResponse struct {
-	Err            error `json:"-"`
-	HTTPStatusCode int   `json:"-"`
-
-	StatusText string `json:"status"`
-	AppCode    int64  `json:"code,omitempty"`
-	ErrorText  string `json:"error,omitempty"`
-}
-
-func (e *ErrResponse) Render(w http.ResponseWriter, r *http.Request) error {
-	render.Status(r, e.HTTPStatusCode)
-	return nil
-}
-
-func ErrInvalidRequest(err error) render.Renderer {
-	return &ErrResponse{
-		Err:            err,
-		HTTPStatusCode: 400,
-		StatusText:     "Invalid request.",
-		ErrorText:      err.Error(),
-	}
 }
