@@ -11,6 +11,6 @@ func main() {
 
 	db := db.NewUserDB(storageFile)
 
-	s := server.NewServer(port, db)
+	s := server.NewServer(port, &db)
 	s.Start()
 }
