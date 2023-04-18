@@ -14,6 +14,7 @@ import (
 	"userapi/pkg/models"
 	ce "userapi/pkg/server/customerrors"
 	"userapi/pkg/server/requests"
+	resp "userapi/pkg/server/responses"
 )
 
 const store = `users.json`
@@ -21,7 +22,7 @@ const store = `users.json`
 func (s *Server) GetAllUsers(w http.ResponseWriter, r *http.Request) {
 	usrs, err := s.db.GetAll()
 	if err != nil {
-		ce.RenderInternalError(w, r, err)
+		resp.RenderInternalError(w, r, err)
 		return
 	}
 	render.JSON(w, r, usrs)
@@ -33,12 +34,12 @@ func (s *Server) GetUser(w http.ResponseWriter, r *http.Request) {
 	u, err := s.db.GetUser(id)
 
 	if err == ce.ErrUserNotFound {
-		ce.RenderInvalidRequest(w, r, err)
+		resp.RenderInvalidRequest(w, r, err)
 		return
 	}
 
 	if err != nil {
-		ce.RenderInternalError(w, r, err)
+		resp.RenderInternalError(w, r, err)
 		return
 	}
 
@@ -49,7 +50,7 @@ func (server *Server) CreateUser(w http.ResponseWriter, r *http.Request) {
 	request := requests.CreateUserRequest{}
 
 	if err := render.Bind(r, &request); err != nil {
-		ce.RenderInvalidRequest(w, r, err)
+		resp.RenderInvalidRequest(w, r, err)
 		return
 	}
 
@@ -62,7 +63,7 @@ func (server *Server) CreateUser(w http.ResponseWriter, r *http.Request) {
 	id, err := server.db.CreateUser(u)
 
 	if err != nil {
-		ce.RenderInternalError(w, r, err)
+		resp.RenderInternalError(w, r, err)
 		return
 	}
 
@@ -80,14 +81,14 @@ func (server *Server) UpdateUser(w http.ResponseWriter, r *http.Request) {
 	request := requests.UpdateUserRequest{}
 
 	if err := render.Bind(r, &request); err != nil {
-		ce.RenderInvalidRequest(w, r, err)
+		resp.RenderInvalidRequest(w, r, err)
 		return
 	}
 
 	id := chi.URLParam(r, "id")
 
 	if _, ok := s.Map[id]; !ok {
-		ce.RenderInvalidRequest(w, r, ce.ErrUserNotFound)
+		resp.RenderInvalidRequest(w, r, ce.ErrUserNotFound)
 		return
 	}
 
@@ -109,7 +110,7 @@ func (server *Server) DeleteUser(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
 
 	if _, ok := s.Map[id]; !ok {
-		ce.RenderInvalidRequest(w, r, ce.ErrUserNotFound)
+		resp.RenderInvalidRequest(w, r, ce.ErrUserNotFound)
 		return
 	}
 

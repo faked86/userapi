@@ -1,4 +1,4 @@
-package customerrors
+package responses
 
 import (
 	"fmt"
