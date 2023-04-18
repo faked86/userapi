@@ -7,7 +7,7 @@ import (
 	"strconv"
 
 	"userapi/pkg/models"
-	"userapi/pkg/server/customerrors"
+	ce "userapi/pkg/server/customerrors"
 )
 
 type UserDB struct {
@@ -36,7 +36,7 @@ func (db *UserDB) GetUser(id string) (models.User, error) {
 		return u, nil
 	}
 
-	return models.User{}, customerrors.ErrUserNotFound
+	return models.User{}, ce.ErrUserNotFound
 }
 
 func (db *UserDB) CreateUser(u models.User) (string, error) {
@@ -54,6 +54,27 @@ func (db *UserDB) CreateUser(u models.User) (string, error) {
 	}
 
 	return id, nil
+}
+
+func (db *UserDB) UpdateUser(id string, displayName string) error {
+	s, err := db.readDB()
+	if err != nil {
+		return err
+	}
+
+	if _, ok := s.Map[id]; !ok {
+		return ce.ErrUserNotFound
+	}
+
+	u := s.Map[id]
+	u.DisplayName = displayName
+	s.Map[id] = u
+
+	if err := db.writeDB(s); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (db *UserDB) readDB() (UserStore, error) {

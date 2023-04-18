@@ -83,10 +83,6 @@ func (server *Server) CreateUser(w http.ResponseWriter, r *http.Request) {
 }
 
 func (server *Server) UpdateUser(w http.ResponseWriter, r *http.Request) {
-	f, _ := ioutil.ReadFile(store)
-	s := db.UserStore{}
-	_ = json.Unmarshal(f, &s)
-
 	request := requests.UpdateUserRequest{}
 
 	if err := render.Bind(r, &request); err != nil {
@@ -94,19 +90,14 @@ func (server *Server) UpdateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	id := chi.URLParam(r, "id")
-
-	if _, ok := s.Map[id]; !ok {
-		resp.RenderInvalidRequest(w, r, ce.ErrUserNotFound)
+	if request.DisplayName == "" {
+		resp.RenderInvalidRequest(w, r, ce.ErrEmptyName)
 		return
 	}
 
-	u := s.Map[id]
-	u.DisplayName = request.DisplayName
-	s.Map[id] = u
+	id := chi.URLParam(r, "id")
 
-	b, _ := json.Marshal(&s)
-	_ = ioutil.WriteFile(store, b, fs.ModePerm)
+	server.db.UpdateUser(id, request.DisplayName)
 
 	render.Status(r, http.StatusNoContent)
 }
