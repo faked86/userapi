@@ -2,7 +2,9 @@ package db
 
 import (
 	"encoding/json"
+	"io/fs"
 	"io/ioutil"
+	"strconv"
 
 	"userapi/pkg/models"
 	"userapi/pkg/server/customerrors"
@@ -18,23 +20,8 @@ func NewUserDB(filename string) UserDB {
 	}
 }
 
-func (db *UserDB) ReadDB() (UserStore, error) {
-	f, err := ioutil.ReadFile(db.filename)
-	if err != nil {
-		return UserStore{}, err
-	}
-
-	s := UserStore{}
-
-	if err = json.Unmarshal(f, &s); err != nil {
-		return UserStore{}, err
-	}
-
-	return s, nil
-}
-
 func (db *UserDB) GetAll() (UserMap, error) {
-	s, err := db.ReadDB()
+	s, err := db.readDB()
 
 	return s.Map, err
 }
@@ -50,4 +37,50 @@ func (db *UserDB) GetUser(id string) (models.User, error) {
 	}
 
 	return models.User{}, customerrors.ErrUserNotFound
+}
+
+func (db *UserDB) CreateUser(u models.User) error {
+	s, err := db.readDB()
+	if err != nil {
+		return err
+	}
+
+	s.Increment++
+	id := strconv.Itoa(s.Increment)
+	s.Map[id] = u
+
+	if err := db.writeDB(s); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (db *UserDB) readDB() (UserStore, error) {
+	f, err := ioutil.ReadFile(db.filename)
+	if err != nil {
+		return UserStore{}, err
+	}
+
+	s := UserStore{}
+
+	if err = json.Unmarshal(f, &s); err != nil {
+		return UserStore{}, err
+	}
+
+	return s, nil
+}
+
+func (db *UserDB) writeDB(s UserStore) error {
+	b, err := json.Marshal(s)
+	if err != nil {
+		return err
+	}
+
+	err = ioutil.WriteFile(db.filename, b, fs.ModePerm)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
