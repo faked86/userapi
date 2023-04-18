@@ -6,8 +6,8 @@ import (
 	"io/ioutil"
 	"strconv"
 
+	ce "userapi/pkg/customerrors"
 	"userapi/pkg/models"
-	ce "userapi/pkg/server/customerrors"
 )
 
 type UserDB struct {

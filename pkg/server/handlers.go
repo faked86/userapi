@@ -7,8 +7,8 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/render"
 
+	ce "userapi/pkg/customerrors"
 	"userapi/pkg/models"
-	ce "userapi/pkg/server/customerrors"
 	"userapi/pkg/server/requests"
 	resp "userapi/pkg/server/responses"
 )
