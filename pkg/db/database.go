@@ -77,6 +77,25 @@ func (db *UserDB) UpdateUser(id string, displayName string) error {
 	return nil
 }
 
+func (db *UserDB) DeleteUser(id string) error {
+	s, err := db.readDB()
+	if err != nil {
+		return err
+	}
+
+	if _, ok := s.Map[id]; !ok {
+		return ce.ErrUserNotFound
+	}
+
+	delete(s.Map, id)
+
+	if err := db.writeDB(s); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (db *UserDB) readDB() (UserStore, error) {
 	f, err := ioutil.ReadFile(db.filename)
 	if err != nil {

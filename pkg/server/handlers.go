@@ -1,16 +1,12 @@
 package server
 
 import (
-	"encoding/json"
-	"io/fs"
-	"io/ioutil"
 	"net/http"
 	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/render"
 
-	"userapi/pkg/db"
 	"userapi/pkg/models"
 	ce "userapi/pkg/server/customerrors"
 	"userapi/pkg/server/requests"
@@ -103,21 +99,9 @@ func (server *Server) UpdateUser(w http.ResponseWriter, r *http.Request) {
 }
 
 func (server *Server) DeleteUser(w http.ResponseWriter, r *http.Request) {
-	f, _ := ioutil.ReadFile(store)
-	s := db.UserStore{}
-	_ = json.Unmarshal(f, &s)
-
 	id := chi.URLParam(r, "id")
 
-	if _, ok := s.Map[id]; !ok {
-		resp.RenderInvalidRequest(w, r, ce.ErrUserNotFound)
-		return
-	}
-
-	delete(s.Map, id)
-
-	b, _ := json.Marshal(&s)
-	_ = ioutil.WriteFile(store, b, fs.ModePerm)
+	server.db.DeleteUser(id)
 
 	render.Status(r, http.StatusNoContent)
 }
