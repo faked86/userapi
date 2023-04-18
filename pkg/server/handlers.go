@@ -13,8 +13,6 @@ import (
 	resp "userapi/pkg/server/responses"
 )
 
-const store = `users.json`
-
 func (s *Server) GetAllUsers(w http.ResponseWriter, r *http.Request) {
 	usrs, err := s.db.GetAll()
 	if err != nil {
