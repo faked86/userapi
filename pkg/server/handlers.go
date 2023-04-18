@@ -5,7 +5,6 @@ import (
 	"io/fs"
 	"io/ioutil"
 	"net/http"
-	"strconv"
 	"time"
 
 	"github.com/go-chi/chi/v5"
@@ -35,6 +34,7 @@ func (s *Server) GetUser(w http.ResponseWriter, r *http.Request) {
 
 	if err == ce.ErrUserNotFound {
 		ce.RenderInvalidRequest(w, r, err)
+		return
 	}
 
 	if err != nil {
@@ -46,10 +46,6 @@ func (s *Server) GetUser(w http.ResponseWriter, r *http.Request) {
 }
 
 func (server *Server) CreateUser(w http.ResponseWriter, r *http.Request) {
-	f, _ := ioutil.ReadFile(store)
-	s := db.UserStore{}
-	_ = json.Unmarshal(f, &s)
-
 	request := requests.CreateUserRequest{}
 
 	if err := render.Bind(r, &request); err != nil {
@@ -57,18 +53,18 @@ func (server *Server) CreateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	s.Increment++
 	u := models.User{
 		CreatedAt:   time.Now(),
 		DisplayName: request.DisplayName,
-		Email:       request.DisplayName,
+		Email:       request.Email,
 	}
 
-	id := strconv.Itoa(s.Increment)
-	s.Map[id] = u
+	id, err := server.db.CreateUser(u)
 
-	b, _ := json.Marshal(&s)
-	_ = ioutil.WriteFile(store, b, fs.ModePerm)
+	if err != nil {
+		ce.RenderInternalError(w, r, err)
+		return
+	}
 
 	render.Status(r, http.StatusCreated)
 	render.JSON(w, r, map[string]interface{}{

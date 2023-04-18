@@ -39,10 +39,10 @@ func (db *UserDB) GetUser(id string) (models.User, error) {
 	return models.User{}, customerrors.ErrUserNotFound
 }
 
-func (db *UserDB) CreateUser(u models.User) error {
+func (db *UserDB) CreateUser(u models.User) (string, error) {
 	s, err := db.readDB()
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	s.Increment++
@@ -50,10 +50,10 @@ func (db *UserDB) CreateUser(u models.User) error {
 	s.Map[id] = u
 
 	if err := db.writeDB(s); err != nil {
-		return err
+		return "", err
 	}
 
-	return nil
+	return id, nil
 }
 
 func (db *UserDB) readDB() (UserStore, error) {
