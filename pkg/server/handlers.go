@@ -91,7 +91,17 @@ func (server *Server) UpdateUser(w http.ResponseWriter, r *http.Request) {
 
 	id := chi.URLParam(r, "id")
 
-	server.db.UpdateUser(id, request.DisplayName)
+	err := server.db.UpdateUser(id, request.DisplayName)
+
+	if err == ce.ErrUserNotFound {
+		resp.RenderNotFound(w, r, err)
+		return
+	}
+
+	if err != nil {
+		resp.RenderInternalError(w, r, err)
+		return
+	}
 
 	render.Status(r, http.StatusNoContent)
 }
@@ -99,7 +109,17 @@ func (server *Server) UpdateUser(w http.ResponseWriter, r *http.Request) {
 func (server *Server) DeleteUser(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
 
-	server.db.DeleteUser(id)
+	err := server.db.DeleteUser(id)
+
+	if err == ce.ErrUserNotFound {
+		resp.RenderNotFound(w, r, err)
+		return
+	}
+
+	if err != nil {
+		resp.RenderInternalError(w, r, err)
+		return
+	}
 
 	render.Status(r, http.StatusNoContent)
 }
