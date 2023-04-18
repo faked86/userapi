@@ -32,6 +32,11 @@ func (s *Server) GetUser(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
 
 	u, err := s.db.GetUser(id)
+
+	if err == ce.ErrUserNotFound {
+		ce.RenderInvalidRequest(w, r, err)
+	}
+
 	if err != nil {
 		ce.RenderInternalError(w, r, err)
 		return
