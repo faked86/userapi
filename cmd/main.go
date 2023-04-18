@@ -9,7 +9,7 @@ func main() {
 	port := "8000"
 	storageFile := "users.json"
 
-	db := db.NewUserDB(storageFile)
+	db := db.NewFileDB(storageFile)
 
 	s := server.NewServer(port, &db)
 	s.Start()

@@ -13,11 +13,11 @@ import (
 
 type Server struct {
 	port   string
-	db     *db.UserDB
+	db     db.UserDB
 	router *chi.Mux
 }
 
-func NewServer(port string, db *db.UserDB) Server {
+func NewServer(port string, db db.UserDB) Server {
 	return Server{
 		port:   port,
 		db:     db,

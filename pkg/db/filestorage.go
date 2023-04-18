@@ -10,23 +10,23 @@ import (
 	"userapi/pkg/models"
 )
 
-type UserDB struct {
+type FileDB struct {
 	filename string
 }
 
-func NewUserDB(filename string) UserDB {
-	return UserDB{
+func NewFileDB(filename string) FileDB {
+	return FileDB{
 		filename: filename,
 	}
 }
 
-func (db *UserDB) GetAll() (UserMap, error) {
+func (db *FileDB) GetAll() (UserMap, error) {
 	s, err := db.readDB()
 
 	return s.Map, err
 }
 
-func (db *UserDB) GetUser(id string) (models.User, error) {
+func (db *FileDB) GetUser(id string) (models.User, error) {
 	usrs, err := db.GetAll()
 	if err != nil {
 		return models.User{}, err
@@ -39,7 +39,7 @@ func (db *UserDB) GetUser(id string) (models.User, error) {
 	return models.User{}, ce.ErrUserNotFound
 }
 
-func (db *UserDB) CreateUser(u models.User) (string, error) {
+func (db *FileDB) CreateUser(u models.User) (string, error) {
 	s, err := db.readDB()
 	if err != nil {
 		return "", err
@@ -56,7 +56,7 @@ func (db *UserDB) CreateUser(u models.User) (string, error) {
 	return id, nil
 }
 
-func (db *UserDB) UpdateUser(id string, displayName string) error {
+func (db *FileDB) UpdateUser(id string, displayName string) error {
 	s, err := db.readDB()
 	if err != nil {
 		return err
@@ -77,7 +77,7 @@ func (db *UserDB) UpdateUser(id string, displayName string) error {
 	return nil
 }
 
-func (db *UserDB) DeleteUser(id string) error {
+func (db *FileDB) DeleteUser(id string) error {
 	s, err := db.readDB()
 	if err != nil {
 		return err
@@ -96,7 +96,7 @@ func (db *UserDB) DeleteUser(id string) error {
 	return nil
 }
 
-func (db *UserDB) readDB() (UserStore, error) {
+func (db *FileDB) readDB() (UserStore, error) {
 	f, err := ioutil.ReadFile(db.filename)
 	if err != nil {
 		return UserStore{}, err
@@ -111,7 +111,7 @@ func (db *UserDB) readDB() (UserStore, error) {
 	return s, nil
 }
 
-func (db *UserDB) writeDB(s UserStore) error {
+func (db *FileDB) writeDB(s UserStore) error {
 	b, err := json.Marshal(s)
 	if err != nil {
 		return err
