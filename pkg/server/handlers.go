@@ -34,7 +34,7 @@ func (s *Server) GetUser(w http.ResponseWriter, r *http.Request) {
 	u, err := s.db.GetUser(id)
 
 	if err == ce.ErrUserNotFound {
-		resp.RenderInvalidRequest(w, r, err)
+		resp.RenderNotFound(w, r, err)
 		return
 	}
 
@@ -71,7 +71,6 @@ func (server *Server) CreateUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	id, err := server.db.CreateUser(u)
-
 	if err != nil {
 		resp.RenderInternalError(w, r, err)
 		return
