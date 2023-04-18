@@ -54,6 +54,16 @@ func (server *Server) CreateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if request.DisplayName == "" {
+		resp.RenderInvalidRequest(w, r, ce.ErrEmptyName)
+		return
+	}
+
+	if request.Email == "" {
+		resp.RenderInvalidRequest(w, r, ce.ErrEmptyEmail)
+		return
+	}
+
 	u := models.User{
 		CreatedAt:   time.Now(),
 		DisplayName: request.DisplayName,
