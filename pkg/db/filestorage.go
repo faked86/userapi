@@ -3,8 +3,9 @@ package db
 import (
 	"encoding/json"
 	"io/fs"
-	"io/ioutil"
+	"os"
 	"strconv"
+	"sync"
 
 	ce "userapi/pkg/customerrors"
 	"userapi/pkg/models"
@@ -12,6 +13,7 @@ import (
 
 type FileDB struct {
 	filename string
+	mu       sync.Mutex
 }
 
 func NewFileDB(filename string) FileDB {
@@ -97,7 +99,10 @@ func (db *FileDB) DeleteUser(id string) error {
 }
 
 func (db *FileDB) readDB() (UserStore, error) {
-	f, err := ioutil.ReadFile(db.filename)
+	db.mu.Lock()
+	defer db.mu.Unlock()
+
+	f, err := os.ReadFile(db.filename)
 	if err != nil {
 		return UserStore{}, err
 	}
@@ -112,12 +117,15 @@ func (db *FileDB) readDB() (UserStore, error) {
 }
 
 func (db *FileDB) writeDB(s UserStore) error {
+	db.mu.Lock()
+	defer db.mu.Unlock()
+
 	b, err := json.Marshal(s)
 	if err != nil {
 		return err
 	}
 
-	err = ioutil.WriteFile(db.filename, b, fs.ModePerm)
+	err = os.WriteFile(db.filename, b, fs.ModePerm)
 	if err != nil {
 		return err
 	}
